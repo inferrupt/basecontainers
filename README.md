@@ -17,3 +17,6 @@ Install the local CLI with:
 ```bash
 /Users/w1/.local/share/cargo/bin/cargo install --path devc-cli
 ```
+
+Container definitions live under `containers/<name>/` and each container directory
+is self-contained for Docker build inputs and helper scripts.

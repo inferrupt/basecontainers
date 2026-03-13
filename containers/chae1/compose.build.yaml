@@ -4,5 +4,5 @@ services:
   dev:
     image: chae1-local
     build:
-      context: ..
-      dockerfile: ./chae1/Dockerfile
+      context: .
+      dockerfile: ./Dockerfile

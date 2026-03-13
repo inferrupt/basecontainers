@@ -62,8 +62,7 @@ RUN set -eux; \
              "/home/${USERNAME}/.codex"; \
     chown -R "${UID}:${GID}" "/home/${USERNAME}"
 
-COPY --link --chown=${UID}:${GID} shared/home/ /home/${USERNAME}/
-COPY --link --chown=${UID}:${GID} shared/codex/config.toml /home/${USERNAME}/.codex/config.toml
+COPY --link --chown=${UID}:${GID} home/ /home/${USERNAME}/
 
 WORKDIR /workspaces/workspace
 

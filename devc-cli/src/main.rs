@@ -4,7 +4,8 @@ use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const MANIFEST_FILE_NAME: &str = ".devc.toml";
+const MANIFEST_FILE_NAME: &str = "devc.toml";
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
     if let Err(error) = run(env::args_os()) {
@@ -21,6 +22,10 @@ where
     match cli.command.as_str() {
         "help" | "--help" | "-h" => {
             print!("{}", usage());
+            Ok(())
+        }
+        "version" | "--version" | "-V" => {
+            print!("{}", version());
             Ok(())
         }
         "init" => handle_init(cli),
@@ -79,6 +84,9 @@ impl Cli {
                 | "--image-repo" => pending_flag = Some(arg),
                 "--help" | "-h" => {
                     cli.command = "help".to_string();
+                }
+                "--version" | "-V" => {
+                    cli.command = "version".to_string();
                 }
                 _ => return Err(format!("unknown argument `{arg}`\n\n{}", usage())),
             }
@@ -319,18 +327,24 @@ fn parse_manifest(contents: &str) -> Result<std::collections::BTreeMap<String, S
 fn usage() -> String {
     [
         "Usage:",
+        "  devc --version",
         "  devc init [--project-dir PATH] [--container NAME] [--workspace-name NAME] [--service-name NAME] [--image-repo REPO]",
         "  devc show [--project-dir PATH]",
         "  devc compose-snippet [--project-dir PATH]",
         "  devc just-snippet [--project-dir PATH]",
         "",
         "Commands:",
-        "  init             Write a project-local .devc.toml manifest.",
+        "  init             Write a project-local devc.toml manifest.",
         "  show             Display the resolved project metadata.",
         "  compose-snippet  Print a compose service snippet for the current project.",
         "  just-snippet     Print a justfile snippet for local wrapper commands.",
+        "  --version, -V    Print the CLI version.",
     ]
     .join("\n")
+}
+
+fn version() -> String {
+    format!("devc {VERSION}\n")
 }
 
 #[cfg(test)]
@@ -367,6 +381,26 @@ mod tests {
     }
 
     #[test]
+    fn init_in_container_layout_uses_leaf_directory_name() {
+        let project_root = temp_dir("container-layout");
+        let project_dir = project_root.join("containers").join("chae1");
+        fs::create_dir_all(&project_dir).unwrap();
+
+        run([
+            OsString::from("devc"),
+            OsString::from("init"),
+            OsString::from("--project-dir"),
+            project_dir.as_os_str().to_os_string(),
+        ])
+        .unwrap();
+
+        let manifest = fs::read_to_string(project_dir.join(MANIFEST_FILE_NAME)).unwrap();
+        assert!(manifest.contains("container = \"chae1\""));
+        assert!(manifest.contains("workspace_name = \"chae1\""));
+        assert!(manifest.contains("image_repo = \"ghcr.io/geoff-hill/chae1-devcontainer\""));
+    }
+
+    #[test]
     fn show_discovers_manifest_from_parent_directory() {
         let project_dir = temp_dir("show");
         let nested_dir = project_dir.join("apps").join("api");
@@ -394,7 +428,7 @@ pin_file = ".devc.local.env"
     #[test]
     fn compose_snippet_uses_manifest_values() {
         let config = ProjectConfig {
-            manifest_path: PathBuf::from("/tmp/.devc.toml"),
+            manifest_path: PathBuf::from("/tmp/devc.toml"),
             container: "chae1".to_string(),
             workspace_name: "demo_repo".to_string(),
             service_name: "agent".to_string(),
@@ -412,7 +446,7 @@ pin_file = ".devc.local.env"
     #[test]
     fn just_snippet_references_pin_file_and_service_name() {
         let config = ProjectConfig {
-            manifest_path: PathBuf::from("/tmp/.devc.toml"),
+            manifest_path: PathBuf::from("/tmp/devc.toml"),
             container: "chae1".to_string(),
             workspace_name: "demo_repo".to_string(),
             service_name: "agent".to_string(),
@@ -425,5 +459,10 @@ pin_file = ".devc.local.env"
         assert!(snippet.contains("DEVCONTAINER_ENV_FILE := \".devc.local.env\""));
         assert!(snippet.contains("docker compose --env-file \"${DEVCONTAINER_ENV_FILE}\" up -d agent"));
         assert!(snippet.contains("docker compose exec -u agent agent bash -l"));
+    }
+
+    #[test]
+    fn version_output_matches_cargo_package_version() {
+        assert_eq!(version(), format!("devc {}\n", env!("CARGO_PKG_VERSION")));
     }
 }

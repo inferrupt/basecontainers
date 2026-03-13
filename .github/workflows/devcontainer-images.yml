@@ -6,8 +6,7 @@ on:
       - main
     paths:
       - .github/workflows/devcontainer-images.yml
-      - shared/**
-      - chae1/**
+      - containers/chae1/**
   workflow_dispatch:
 
 permissions:
@@ -27,8 +26,8 @@ jobs:
           - name: chae1
             image_name: chae1-devcontainer
             env_var: CHAE1_IMAGE
-            context: .
-            dockerfile: ./chae1/Dockerfile
+            context: ./containers/chae1
+            dockerfile: ./containers/chae1/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4

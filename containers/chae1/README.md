@@ -1,10 +1,11 @@
 # chae1
 
 `chae1` is a reusable development container image plus local compose/just wiring.
+Its Docker build inputs and helper scripts live entirely within `containers/chae1/`.
 
 Defaults:
 
-- Workspace path: `../../chora_platform_agent`
+- Workspace path: sibling checkout `../chora_platform_agent`
 - Workspace name inside container: `chora_platform`
 - Registry image: `ghcr.io/geoff-hill/chae1-devcontainer:latest`
 

@@ -10,7 +10,7 @@ containers:
 
 # Run a `chae1` recipe from the repo root.
 chae1 +args:
-	@JUST_JUSTFILE={{justfile_directory() + "/chae1/justfile"}} just {{args}}
+	@JUST_JUSTFILE={{justfile_directory() + "/containers/chae1/justfile"}} just {{args}}
 
 # Run the local devc CLI test suite.
 devc-test:

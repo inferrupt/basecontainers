@@ -1,12 +1,11 @@
 # Local host commands for the chae1 development container.
 
 WORKSPACE_DIR := justfile_directory()
-REPO_ROOT := WORKSPACE_DIR + "/.."
 BASE_COMPOSE_FILE := WORKSPACE_DIR + "/compose.yaml"
 BUILD_COMPOSE_FILE := WORKSPACE_DIR + "/compose.build.yaml"
 PIN_ENV_FILE := WORKSPACE_DIR + "/.env.image.pin"
-PIN_SCRIPT := REPO_ROOT + "/shared/scripts/pin-image.sh"
-DEFAULT_WORKSPACE_PATH := WORKSPACE_DIR + "/../../chora_platform_agent"
+PIN_SCRIPT := WORKSPACE_DIR + "/scripts/pin-image.sh"
+DEFAULT_WORKSPACE_PATH := WORKSPACE_DIR + "/../../../chora_platform_agent"
 WORKSPACE_PATH_VALUE := env_var_or_default("WORKSPACE_PATH", DEFAULT_WORKSPACE_PATH)
 WORKSPACE_NAME_VALUE := env_var_or_default("WORKSPACE_NAME", "chora_platform")
 DEV_UID_VALUE := env_var_or_default("DEV_UID", "504")
