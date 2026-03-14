@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     git \
+    gosu \
     openssh-client \
     build-essential \
     pkg-config \
@@ -63,9 +64,11 @@ RUN set -eux; \
     chown -R "${UID}:${GID}" "/home/${USERNAME}"
 
 COPY --link --chown=${UID}:${GID} home/ /home/${USERNAME}/
+COPY --link scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod 0755 /usr/local/bin/entrypoint.sh
 
 WORKDIR /workspaces/workspace
 
-USER ${USERNAME}
-
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]

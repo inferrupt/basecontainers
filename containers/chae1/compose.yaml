@@ -4,7 +4,7 @@ x-chae1-base: &chae1-base
   image: ${CHAE1_IMAGE:-ghcr.io/geoff-hill/chae1-devcontainer:latest}
   command: sleep infinity
   working_dir: /workspaces/${WORKSPACE_NAME:-workspace}
-  user: "${DEV_UID:-504}:${DEV_GID:-20}"
+  user: "0:0"
   security_opt:
     - no-new-privileges:true
   cap_drop:
