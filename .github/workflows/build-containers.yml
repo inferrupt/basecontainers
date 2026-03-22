@@ -1,0 +1,121 @@
+name: Build Containers
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      container:
+        description: Top-level container directory to build
+        required: true
+        type: string
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      has_containers: ${{ steps.discover.outputs.has_containers }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Discover changed container directories
+        id: discover
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+          GHCR_OWNER: ${{ github.repository_owner }}
+          DISPATCH_CONTAINER: ${{ github.event.inputs.container }}
+        run: |
+          python3 <<'PY' >>"$GITHUB_OUTPUT"
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          event_name = os.environ["EVENT_NAME"]
+          before_sha = os.environ.get("BEFORE_SHA", "")
+          current_sha = os.environ["CURRENT_SHA"]
+          owner = os.environ["GHCR_OWNER"].lower()
+          dispatch_container = os.environ.get("DISPATCH_CONTAINER", "").strip()
+
+          def container_entry(path: Path) -> dict[str, str]:
+              return {
+                  "directory": path.name,
+                  "dockerfile": str(path / "Dockerfile"),
+                  "image": f"ghcr.io/{owner}/{path.name.lower()}",
+              }
+
+          if event_name == "workflow_dispatch":
+              changed_dirs = {dispatch_container} if dispatch_container else set()
+          else:
+              diff_base = before_sha if before_sha and before_sha != "0000000000000000000000000000000000000000" else f"{current_sha}^"
+              result = subprocess.run(
+                  ["git", "diff", "--name-only", diff_base, current_sha],
+                  check=True,
+                  text=True,
+                  capture_output=True,
+              )
+              changed_dirs = {
+                  Path(line).parts[0]
+                  for line in result.stdout.splitlines()
+                  if line.strip() and len(Path(line).parts) > 0
+              }
+
+          containers = []
+          for dirname in sorted(changed_dirs):
+              path = Path(dirname)
+              if path.is_dir() and (path / "Dockerfile").is_file():
+                  containers.append(container_entry(path))
+
+          print(f"matrix={json.dumps(containers, separators=(',', ':'))}")
+          print(f"has_containers={'true' if containers else 'false'}")
+          PY
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.has_containers == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.container.image }}
+          tags: |
+            type=raw,value=${{ github.sha }}
+            type=raw,value=latest
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.container.directory }}
+          file: ${{ matrix.container.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
