@@ -6,6 +6,11 @@ ARG GID=20
 ARG JUST_VERSION=1.40.0
 ARG MISE_VERSION=2026.3.6
 
+LABEL org.opencontainers.image.title="chae1" \
+      org.opencontainers.image.description="Reusable development container image for the chae1 environment." \
+      org.opencontainers.image.source="https://github.com/inferrupt/basecontainers" \
+      org.opencontainers.image.licenses="Apache-2.0"
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/usr/local/bin:${PATH}"
 
