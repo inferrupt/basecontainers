@@ -1,21 +1,38 @@
-# Multi-container entrypoint for the devcontainers repo.
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-# List available container environments.
-default:
-	just --list
+repo_root := justfile_directory()
 
-# List the currently scaffolded container definitions.
+_container-guard container:
+	@test -f "{{repo_root}}/{{container}}/Dockerfile" || (echo "error: unknown container '{{container}}'" >&2; exit 1)
+
+# List available top-level container directories.
 containers:
-	@printf '%s\n' chae1
+	@find "{{repo_root}}" -mindepth 2 -maxdepth 2 -name Dockerfile -exec dirname {} \; | xargs -n1 basename
 
-# Run a `chae1` recipe from the repo root.
-chae1 +args:
-	@JUST_JUSTFILE={{justfile_directory() + "/containers/chae1/justfile"}} just {{args}}
+# Print the local image tag for a container.
+image container:
+	@just _container-guard "{{container}}"
+	@echo "local/basecontainers-{{container}}:dev"
 
-# Run the local devc CLI test suite.
-devc-test:
-	@/Users/w1/.local/share/cargo/bin/cargo test --manifest-path {{justfile_directory() + "/devc-cli/Cargo.toml"}}
+# Build a container locally with a clearly local-only image tag.
+build container:
+	@just _container-guard "{{container}}"
+	docker build --tag "local/basecontainers-{{container}}:dev" "{{repo_root}}/{{container}}"
 
-# Install the local devc CLI from source.
-devc-install:
-	@/Users/w1/.local/share/cargo/bin/cargo install --path {{justfile_directory() + "/devc-cli"}}
+# Rebuild a container locally without using the Docker cache.
+rebuild container:
+	@just _container-guard "{{container}}"
+	docker build --no-cache --tag "local/basecontainers-{{container}}:dev" "{{repo_root}}/{{container}}"
+
+# Smoke-test a container by starting it locally and running a minimal shell check.
+smoke container:
+	@just _container-guard "{{container}}"
+	docker run --rm --pull never --entrypoint /bin/sh "local/basecontainers-{{container}}:dev" -lc 'id >/dev/null'
+
+# Build and smoke-test a container.
+test container:
+	@just build "{{container}}"
+	@just smoke "{{container}}"
+
+default:
+	@just --list

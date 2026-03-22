@@ -2,7 +2,7 @@ name: chae1
 
 services:
   dev:
-    image: chae1-local
+    image: local/basecontainers-chae1:dev
     build:
       context: .
       dockerfile: ./Dockerfile

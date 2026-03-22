@@ -1,8 +1,0 @@
-name: chae1
-
-services:
-  dev:
-    image: chae1-local
-    build:
-      context: .
-      dockerfile: ./Dockerfile
