@@ -5,10 +5,10 @@ ARG UID=504
 ARG GID=20
 ARG MISE_VERSION=2026.3.6
 
-LABEL org.opencontainers.image.title="chae1" \
-      org.opencontainers.image.description="Reusable development container image containg mise." \
-      org.opencontainers.image.source="https://github.com/inferrupt/basecontainers" \
-      org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.title="chae1"
+LABEL org.opencontainers.image.description="Reusable development container image containg mise."
+LABEL org.opencontainers.image.source="https://github.com/inferrupt/basecontainers"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/usr/local/bin:${PATH}"
