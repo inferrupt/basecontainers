@@ -37,6 +37,7 @@ jobs:
           import os
           import subprocess
           from pathlib import Path
+          import re
 
           event_name = os.environ["EVENT_NAME"]
           before_sha = os.environ.get("BEFORE_SHA", "")
@@ -44,11 +45,28 @@ jobs:
           owner = os.environ["GHCR_OWNER"].lower()
           dispatch_container = os.environ.get("DISPATCH_CONTAINER", "").strip()
 
+          label_pattern = re.compile(
+              r'^LABEL\s+org\.opencontainers\.image\.(title|description|source|licenses)="([^"]*)"$'
+          )
+
+          def read_oci_labels(dockerfile: Path) -> dict[str, str]:
+              labels = {}
+              for line in dockerfile.read_text().splitlines():
+                  match = label_pattern.match(line.strip())
+                  if match:
+                      labels[match.group(1)] = match.group(2)
+              return labels
+
           def container_entry(path: Path) -> dict[str, str]:
+              labels = read_oci_labels(path / "Dockerfile")
               return {
                   "directory": path.name,
                   "dockerfile": str(path / "Dockerfile"),
                   "image": f"ghcr.io/{owner}/{path.name.lower()}",
+                  "title": labels.get("title", path.name),
+                  "description": labels.get("description", ""),
+                  "source": labels.get("source", f"https://github.com/{owner}/{Path('.').resolve().name}"),
+                  "licenses": labels.get("licenses", ""),
               }
 
           if event_name == "workflow_dispatch":
@@ -108,6 +126,8 @@ jobs:
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
         with:
           images: ${{ matrix.container.image }}
           tags: |
@@ -116,6 +136,11 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.url=https://github.com/${{ github.repository }}
+          annotations: |
+            org.opencontainers.image.title=${{ matrix.container.title }}
+            org.opencontainers.image.description=${{ matrix.container.description }}
+            org.opencontainers.image.source=${{ matrix.container.source }}
+            org.opencontainers.image.licenses=${{ matrix.container.licenses }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -126,3 +151,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
