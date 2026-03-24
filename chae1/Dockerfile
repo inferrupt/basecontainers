@@ -1,3 +1,4 @@
+# test
 FROM debian:trixie-slim
 
 ARG USERNAME=agent
@@ -64,6 +65,7 @@ COPY --link scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod 0755 /usr/local/bin/entrypoint.sh
 
 WORKDIR /workspaces
+
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]
