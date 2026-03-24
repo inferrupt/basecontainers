@@ -18,6 +18,8 @@ Current containers:
 ## Publishing
 
 GitHub Actions builds only the top-level container directories changed in a push to `main`.
+After the publish succeeds on `main`, the same workflow pushes matching
+container-scoped Git tags such as `chae1/v0.1.1`.
 
 Published images are pushed to:
 
@@ -71,8 +73,10 @@ To push both the current `main` branch and the matching lightweight tag:
 just release-push <container> <major|minor|patch>
 ```
 
-After a PR with an `IMAGE_VERSION` bump has merged to `main`, tag the merged
-commit using the existing version with:
+After a PR with an `IMAGE_VERSION` bump has merged to `main`, the publish
+workflow will normally push the matching container tag automatically. If you
+need to recover or recreate that step manually, tag the merged commit using the
+existing version with:
 
 ```bash
 just tag-release <container>

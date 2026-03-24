@@ -160,3 +160,67 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
+
+  tag-release:
+    needs:
+      - discover
+      - build
+    if: github.event_name == 'push' && needs.discover.outputs.has_containers == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Create container release tags
+        env:
+          CONTAINERS_JSON: ${{ needs.discover.outputs.matrix }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+
+          containers = json.loads(os.environ["CONTAINERS_JSON"])
+          current_sha = os.environ["CURRENT_SHA"]
+
+          for container in containers:
+              version = container.get("version", "").strip()
+              directory = container["directory"]
+
+              if not version:
+                  print(f"error: missing version for {directory}", file=sys.stderr)
+                  sys.exit(1)
+
+              tag = f"{directory}/v{version}"
+              result = subprocess.run(
+                  ["git", "rev-parse", "--verify", "--quiet", tag],
+                  text=True,
+                  capture_output=True,
+              )
+
+              if result.returncode == 0:
+                  existing_target = subprocess.run(
+                      ["git", "rev-list", "-n", "1", tag],
+                      check=True,
+                      text=True,
+                      capture_output=True,
+                  ).stdout.strip()
+                  if existing_target == current_sha:
+                      print(f"{tag} already exists on {current_sha}; skipping")
+                      continue
+                  print(
+                      f"error: {tag} already exists on {existing_target}, expected {current_sha}",
+                      file=sys.stderr,
+                  )
+                  sys.exit(1)
+
+              subprocess.run(["git", "tag", tag, current_sha], check=True)
+              subprocess.run(["git", "push", "origin", f"refs/tags/{tag}"], check=True)
+              print(f"created and pushed {tag}")
+          PY
