@@ -70,3 +70,12 @@ To push both the current `main` branch and the matching lightweight tag:
 ```bash
 just release-push <container> <major|minor|patch>
 ```
+
+## Pull Request Gate
+
+Pull requests to `main` are expected to be releasable.
+
+If a PR changes any top-level container directory, the PR must also bump that
+container's `IMAGE_VERSION` in its Dockerfile. The GitHub workflow
+[`check-container-versions.yml`](/Users/w1/Workspaces/basecontainers/.github/workflows/check-container-versions.yml)
+enforces this rule.

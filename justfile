@@ -4,6 +4,7 @@ repo_root := justfile_directory()
 release_script := repo_root + "/scripts/release-container.sh"
 metadata_test_script := repo_root + "/scripts/test-release-metadata.sh"
 release_flow_test_script := repo_root + "/scripts/test-release-flow.sh"
+pr_version_check_script := repo_root + "/scripts/check-pr-container-versions.sh"
 
 _container-guard container:
 	@test -f "{{repo_root}}/{{container}}/Dockerfile" || (echo "error: unknown container '{{container}}'" >&2; exit 1)
@@ -46,6 +47,10 @@ verify-release container:
 test-release container:
 	@just _container-guard "{{container}}"
 	"{{release_flow_test_script}}" "{{container}}"
+
+# Verify that changed containers between two refs have bumped IMAGE_VERSION.
+check-pr-versions base_ref head_ref:
+	bash "{{pr_version_check_script}}" "{{base_ref}}" "{{head_ref}}"
 
 # Bump a container SemVer in its Dockerfile, commit the container directory, and create a lightweight <container>/vX.Y.Z tag.
 release container bump:
