@@ -48,17 +48,25 @@ jobs:
           label_pattern = re.compile(
               r'^LABEL\s+org\.opencontainers\.image\.(title|description|source|licenses)="([^"]*)"$'
           )
+          version_arg_pattern = re.compile(
+              r'^ARG\s+[A-Z0-9_]+_VERSION=([0-9]+\.[0-9]+\.[0-9]+)$'
+          )
 
-          def read_oci_labels(dockerfile: Path) -> dict[str, str]:
+          def read_dockerfile_metadata(dockerfile: Path) -> dict[str, str]:
               labels = {}
+              version = ""
               for line in dockerfile.read_text().splitlines():
                   match = label_pattern.match(line.strip())
                   if match:
                       labels[match.group(1)] = match.group(2)
+                  version_match = version_arg_pattern.match(line.strip())
+                  if version_match:
+                      version = version_match.group(1)
+              labels["version"] = version
               return labels
 
           def container_entry(path: Path) -> dict[str, str]:
-              labels = read_oci_labels(path / "Dockerfile")
+              labels = read_dockerfile_metadata(path / "Dockerfile")
               return {
                   "directory": path.name,
                   "dockerfile": str(path / "Dockerfile"),
@@ -67,6 +75,7 @@ jobs:
                   "description": labels.get("description", ""),
                   "source": labels.get("source", f"https://github.com/{owner}/{Path('.').resolve().name}"),
                   "licenses": labels.get("licenses", ""),
+                  "version": labels.get("version", ""),
               }
 
           if event_name == "workflow_dispatch":
@@ -133,6 +142,7 @@ jobs:
           tags: |
             type=raw,value=${{ github.sha }}
             type=raw,value=latest
+            type=raw,value=${{ matrix.container.version }},enable=${{ matrix.container.version != '' }}
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.url=https://github.com/${{ github.repository }}

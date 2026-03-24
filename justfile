@@ -1,6 +1,7 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
 repo_root := justfile_directory()
+release_script := repo_root + "/scripts/release-container.sh"
 
 _container-guard container:
 	@test -f "{{repo_root}}/{{container}}/Dockerfile" || (echo "error: unknown container '{{container}}'" >&2; exit 1)
@@ -33,6 +34,16 @@ smoke container:
 test container:
 	@just build "{{container}}"
 	@just smoke "{{container}}"
+
+# Bump a container SemVer in its Dockerfile, commit the container directory, and create a lightweight <container>/vX.Y.Z tag.
+release container bump:
+	@just _container-guard "{{container}}"
+	"{{release_script}}" "{{container}}" "{{bump}}"
+
+# Run the release workflow and push the current main branch plus the matching lightweight tag.
+release-push container bump:
+	@just _container-guard "{{container}}"
+	"{{release_script}}" "{{container}}" "{{bump}}" --push
 
 default:
 	@just --list

@@ -8,7 +8,7 @@ PIN_SCRIPT := WORKSPACE_DIR + "/scripts/pin-image.sh"
 DEFAULT_WORKSPACE_PATH := WORKSPACE_DIR + "/../../../workspace_agent"
 WORKSPACE_PATH_VALUE := env_var_or_default("AGENT_WORKSPACE", DEFAULT_WORKSPACE_PATH)
 WORKSPACE_NAME_VALUE := env_var_or_default("WORKSPACE_NAME", "workspace")
-IMAGE_REPO := env_var_or_default("IMAGE_REPO", "ghcr.io/geoff-hill/chae1-devcontainer")
+IMAGE_REPO := env_var_or_default("IMAGE_REPO", "ghcr.io/inferrupt/chae1")
 
 _workspace-guard:
 	@git -C "{{WORKSPACE_PATH_VALUE}}" rev-parse --is-inside-work-tree >/dev/null 2>&1 || (echo "error: missing workspace git checkout: {{WORKSPACE_PATH_VALUE}}" >&2; exit 1)

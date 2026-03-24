@@ -25,6 +25,7 @@ Published images are pushed to:
 
 Tags:
 
+- SemVer tag from the container Dockerfile version, for example `0.1.0`
 - full commit SHA for immutable pinning
 - `latest` as a convenience pointer only
 
@@ -49,3 +50,23 @@ That makes locally built images easy to distinguish from GHCR-published images i
 Container-specific runtime usage is documented in each container directory, for example:
 
 - `./chae1/README.md`
+
+## Releasing
+
+For containers that use a `<NAME>_VERSION=x.y.z` Dockerfile argument, use:
+
+```bash
+just release <container> <major|minor|patch>
+```
+
+This will:
+
+- bump the Dockerfile SemVer
+- commit the container directory
+- create a lightweight `<container>/v<version>` tag at that commit
+
+To push both the current `main` branch and the matching lightweight tag:
+
+```bash
+just release-push <container> <major|minor|patch>
+```
