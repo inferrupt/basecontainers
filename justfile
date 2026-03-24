@@ -2,8 +2,10 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
 repo_root := justfile_directory()
 release_script := repo_root + "/scripts/release-container.sh"
+tag_script := repo_root + "/scripts/tag-container.sh"
 metadata_test_script := repo_root + "/scripts/test-release-metadata.sh"
 release_flow_test_script := repo_root + "/scripts/test-release-flow.sh"
+tag_flow_test_script := repo_root + "/scripts/test-tag-flow.sh"
 pr_version_check_script := repo_root + "/scripts/check-pr-container-versions.sh"
 
 _container-guard container:
@@ -48,6 +50,11 @@ test-release container:
 	@just _container-guard "{{container}}"
 	"{{release_flow_test_script}}" "{{container}}"
 
+# Verify the post-merge tag workflow creates the expected container-scoped tag in a temporary repo copy.
+test-tag container:
+	@just _container-guard "{{container}}"
+	bash "{{tag_flow_test_script}}" "{{container}}"
+
 # Verify that changed containers between two refs have bumped IMAGE_VERSION.
 check-pr-versions base_ref head_ref:
 	bash "{{pr_version_check_script}}" "{{base_ref}}" "{{head_ref}}"
@@ -61,6 +68,16 @@ release container bump:
 release-push container bump:
 	@just _container-guard "{{container}}"
 	"{{release_script}}" "{{container}}" "{{bump}}" --push
+
+# Tag the current main commit using the existing IMAGE_VERSION for a container.
+tag-release container:
+	@just _container-guard "{{container}}"
+	bash "{{tag_script}}" "{{container}}"
+
+# Tag the current main commit using the existing IMAGE_VERSION for a container and push only the tag.
+tag-release-push container:
+	@just _container-guard "{{container}}"
+	bash "{{tag_script}}" "{{container}}" --push
 
 default:
 	@just --list
