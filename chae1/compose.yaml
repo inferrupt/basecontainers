@@ -1,7 +1,7 @@
 name: chae1
 
 x-chae1-base: &chae1-base
-  image: ${IMAGE:-ghcr.io/geoff-hill/chae1-devcontainer:latest}
+  image: ${IMAGE:-ghcr.io/inferrupt/chae1:latest}
   command: sleep infinity
   working_dir: /workspaces/${WORKSPACE_NAME:-workspace}
   user: "0:0"

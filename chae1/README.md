@@ -7,7 +7,7 @@ Defaults:
 
 - Workspace path: sibling checkout `../workspace_agent`
 - Default working directory inside container: `/workspaces`
-- Registry image: `ghcr.io/geoff-hill/chae1-devcontainer:latest`
+- Registry image: `ghcr.io/inferrupt/chae1:latest`
 - Container version: `0.1.0`
 
 Run from the repo root:
@@ -28,5 +28,6 @@ AGENT_WORKSPACE=/absolute/path/to/other/repo WORKSPACE_NAME=my_repo just chae1 u
 Versioning:
 
 - `chae1` uses manual SemVer for container changes.
-- Update `CHAE1_VERSION` in `chae1/Dockerfile` when this container changes.
-- Tag the repository with `v<version>` for the corresponding commit.
+- Use `just release chae1 <major|minor|patch>` to bump `CHAE1_VERSION`, commit `chae1/`, and create a lightweight `v<version>` tag.
+- Use `just release-push chae1 <major|minor|patch>` from `main` to do the release and push both `main` and the matching lightweight tag.
+- The publish workflow tags GHCR images with the Dockerfile version, commit SHA, and `latest`.
