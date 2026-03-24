@@ -3,7 +3,7 @@ FROM debian:trixie-slim
 ARG USERNAME=agent
 ARG UID=504
 ARG GID=20
-ARG IMAGE_VERSION=0.1.0
+ARG IMAGE_VERSION=0.1.1
 ARG MISE_VERSION=2026.3.6
 
 LABEL org.opencontainers.image.title="chae1"
