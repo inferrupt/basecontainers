@@ -35,7 +35,7 @@ test container:
 	@just build "{{container}}"
 	@just smoke "{{container}}"
 
-# Bump a container SemVer in its Dockerfile, commit the container directory, and create a lightweight vX.Y.Z tag.
+# Bump a container SemVer in its Dockerfile, commit the container directory, and create a lightweight <container>/vX.Y.Z tag.
 release container bump:
 	@just _container-guard "{{container}}"
 	"{{release_script}}" "{{container}}" "{{bump}}"

@@ -57,7 +57,7 @@ case "${bump}" in
     ;;
 esac
 
-tag="v${new_version}"
+tag="${container}/v${new_version}"
 
 if git -C "${repo_root}" rev-parse --verify --quiet "${tag}" >/dev/null; then
   echo "error: tag ${tag} already exists" >&2

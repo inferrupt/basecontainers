@@ -63,7 +63,7 @@ This will:
 
 - bump the Dockerfile SemVer
 - commit the container directory
-- create a lightweight `v<version>` tag at that commit
+- create a lightweight `<container>/v<version>` tag at that commit
 
 To push both the current `main` branch and the matching lightweight tag:
 
