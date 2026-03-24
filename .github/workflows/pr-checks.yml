@@ -1,12 +1,17 @@
-name: Check Container Versions
+name: PR checks
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  check:
+  ci-required:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CI gate
+        run: echo "CI gate"
+
+  check-image-version:
     runs-on: ubuntu-latest
     permissions:
       contents: read
