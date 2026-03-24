@@ -31,7 +31,7 @@ if [[ "${push_mode}" == "--push" ]]; then
   fi
 fi
 
-version_arg_name="$(printf '%s' "${container}" | tr '[:lower:]-' '[:upper:]_')_VERSION"
+version_arg_name="IMAGE_VERSION"
 current_version="$(sed -nE "s/^ARG ${version_arg_name}=([0-9]+\.[0-9]+\.[0-9]+)$/\1/p" "${dockerfile}")"
 
 if [[ -z "${current_version}" ]]; then

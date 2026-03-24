@@ -53,7 +53,7 @@ Container-specific runtime usage is documented in each container directory, for 
 
 ## Releasing
 
-For containers that use a `<NAME>_VERSION=x.y.z` Dockerfile argument, use:
+For containers that use an `IMAGE_VERSION=x.y.z` Dockerfile argument, use:
 
 ```bash
 just release <container> <major|minor|patch>
