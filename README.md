@@ -71,11 +71,24 @@ To push both the current `main` branch and the matching lightweight tag:
 just release-push <container> <major|minor|patch>
 ```
 
+After a PR with an `IMAGE_VERSION` bump has merged to `main`, tag the merged
+commit using the existing version with:
+
+```bash
+just tag-release <container>
+```
+
+To push only the matching container tag to origin:
+
+```bash
+just tag-release-push <container>
+```
+
 ## Pull Request Gate
 
 Pull requests to `main` are expected to be releasable.
 
 If a PR changes any top-level container directory, the PR must also bump that
 container's `IMAGE_VERSION` in its Dockerfile. The GitHub workflow
-[`check-container-versions.yml`](/Users/w1/Workspaces/basecontainers/.github/workflows/check-container-versions.yml)
+[`pr-checks.yml`](/Users/w1/Workspaces/basecontainers/.github/workflows/pr-checks.yml)
 enforces this rule.
