@@ -6,8 +6,9 @@ Its Docker build inputs and helper scripts live entirely within `containers/chae
 Defaults:
 
 - Workspace path: sibling checkout `../workspace_agent`
-- Workspace name inside container: `workspace`
+- Default working directory inside container: `/workspaces`
 - Registry image: `ghcr.io/geoff-hill/chae1-devcontainer:latest`
+- Container version: `0.1.0`
 
 Run from the repo root:
 
@@ -23,3 +24,9 @@ Override the mounted repo when needed:
 ```bash
 AGENT_WORKSPACE=/absolute/path/to/other/repo WORKSPACE_NAME=my_repo just chae1 up
 ```
+
+Versioning:
+
+- `chae1` uses manual SemVer for container changes.
+- Update `CHAE1_VERSION` in `chae1/Dockerfile` when this container changes.
+- Tag the repository with `v<version>` for the corresponding commit.
