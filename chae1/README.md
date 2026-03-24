@@ -28,6 +28,6 @@ AGENT_WORKSPACE=/absolute/path/to/other/repo WORKSPACE_NAME=my_repo just chae1 u
 Versioning:
 
 - `chae1` uses manual SemVer for container changes.
-- Use `just release chae1 <major|minor|patch>` to bump `CHAE1_VERSION`, commit `chae1/`, and create a lightweight `chae1/v<version>` tag.
+- Use `just release chae1 <major|minor|patch>` to bump `IMAGE_VERSION`, commit `chae1/`, and create a lightweight `chae1/v<version>` tag.
 - Use `just release-push chae1 <major|minor|patch>` from `main` to do the release and push both `main` and the matching lightweight tag.
 - The publish workflow tags GHCR images with the Dockerfile version, commit SHA, and `latest`.

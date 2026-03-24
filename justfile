@@ -2,6 +2,8 @@ set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
 repo_root := justfile_directory()
 release_script := repo_root + "/scripts/release-container.sh"
+metadata_test_script := repo_root + "/scripts/test-release-metadata.sh"
+release_flow_test_script := repo_root + "/scripts/test-release-flow.sh"
 
 _container-guard container:
 	@test -f "{{repo_root}}/{{container}}/Dockerfile" || (echo "error: unknown container '{{container}}'" >&2; exit 1)
@@ -34,6 +36,16 @@ smoke container:
 test container:
 	@just build "{{container}}"
 	@just smoke "{{container}}"
+
+# Verify critical versioning and image metadata expectations for a container.
+verify-release container:
+	@just _container-guard "{{container}}"
+	"{{metadata_test_script}}" "{{container}}"
+
+# Verify the release workflow bumps IMAGE_VERSION, commits, and tags correctly in a temporary repo copy.
+test-release container:
+	@just _container-guard "{{container}}"
+	"{{release_flow_test_script}}" "{{container}}"
 
 # Bump a container SemVer in its Dockerfile, commit the container directory, and create a lightweight <container>/vX.Y.Z tag.
 release container bump:

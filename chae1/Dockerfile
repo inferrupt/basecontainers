@@ -3,14 +3,14 @@ FROM debian:trixie-slim
 ARG USERNAME=agent
 ARG UID=504
 ARG GID=20
-ARG CHAE1_VERSION=0.1.0
+ARG IMAGE_VERSION=0.1.0
 ARG MISE_VERSION=2026.3.6
 
 LABEL org.opencontainers.image.title="chae1"
 LABEL org.opencontainers.image.description="Reusable development container image containing mise."
 LABEL org.opencontainers.image.source="https://github.com/inferrupt/basecontainers"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.version="${CHAE1_VERSION}"
+LABEL org.opencontainers.image.version="${IMAGE_VERSION}"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/usr/local/bin:${PATH}"
