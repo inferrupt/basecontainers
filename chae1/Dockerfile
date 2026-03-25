@@ -1,9 +1,10 @@
+# test
 FROM debian:trixie-slim
 
 ARG USERNAME=agent
 ARG UID=504
 ARG GID=20
-ARG IMAGE_VERSION=0.1.1
+ARG IMAGE_VERSION=0.2.0
 ARG MISE_VERSION=2026.3.6
 
 LABEL org.opencontainers.image.title="chae1"
@@ -64,6 +65,7 @@ COPY --link scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod 0755 /usr/local/bin/entrypoint.sh
 
 WORKDIR /workspaces
+
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]
